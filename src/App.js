@@ -1,37 +1,25 @@
-import { Component } from "react/cjs/react.production.min";
+import { Component } from "react";
+import { ToastContainer } from "react-toastify";
 import SearchBar from "./components/SearchBar";
-import Button from "./components/Button";
 import ImageGallery from "./components/ImageGallery";
-import ImageGalleryItem from "./components/ImageGalleryItem";
-import Loader from "./components/Loader";
-import Modal from "./components/Modal";
 
 export default class App extends Component {
   state = {
-    showModal: false,
+    searchQuery: "",
+    currentPage: 1,
   };
 
-  componentDidMount() {}
-
-  componentDidUpdate(prevProps, prevState) {}
-
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
+  handleFormSubmit = (searchQuery) => {
+    this.setState({ searchQuery });
   };
 
   render() {
-    const { showModal } = this.state;
-
+    const { searchQuery, currentPage } = this.state;
     return (
-      <>
-        <SearchBar />
-        <ImageGallery>
-          {showModal && <Modal onClose={this.toggleModal} />}
-          <ImageGalleryItem onOpenModal={this.toggleModal} />
-        </ImageGallery>
-      </>
+      <div style={{ width: "100%", margin: "0 auto", padding: 0 }}>
+        <SearchBar onSubmit={this.handleFormSubmit} />
+        <ImageGallery searchQuery={searchQuery} currentPage={currentPage} />
+      </div>
     );
   }
 }

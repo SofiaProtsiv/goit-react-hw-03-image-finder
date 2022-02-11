@@ -1,16 +1,24 @@
-import PropTypes from "prop-types";
 import style from "./imageGalleryItem.module.css";
 
-function ImageGalleryItem({ onOpenModal }) {
+export default function ImageGalleryItem({ images: { hits }, openModal }) {
   return (
-    <li className={style.item} onClick={() => onOpenModal()}>
-      <img className={style.image} src="" alt="" />
-    </li>
+    <>
+      <ul className={style.imageGallery}>
+        {hits.map((entry) => (
+          <li
+            key={entry.id}
+            id={entry.id}
+            className={style.item}
+            onClick={openModal}
+          >
+            <img
+              className={style.image}
+              src={entry.largeImageURL}
+              alt={entry.id}
+            />
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }
-
-// ImageGalleryItem.propTypes = {
-//   children: PropTypes.node.isRequired,
-// };
-
-export default ImageGalleryItem;
