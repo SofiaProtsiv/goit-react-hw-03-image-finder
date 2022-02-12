@@ -39,3 +39,15 @@ button {
     transform: rotate(359deg);
   }
 }
+
+.modalImage {
+  width: 600px;
+  height: 400px;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  text-align: center;
+}

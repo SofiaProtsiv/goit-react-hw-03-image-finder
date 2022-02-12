@@ -1,19 +1,15 @@
-import PropTypes from "prop-types";
-import { PureComponent } from "react/cjs/react.production.min";
+import React, { Component } from "react";
 import { createPortal } from "react-dom";
-import style from "./modal.module.css";
+import PropTypes from "prop-types";
+import styles from "./modal.module.css";
 
 const modalRoot = document.querySelector("#modal-root");
 
-class Modal extends PureComponent {
-  static propTypes = {
-    onClose: PropTypes.func.isRequired,
-    children: PropTypes.node.isRequired,
-  };
-
+class Modal extends Component {
   componentDidMount() {
     window.addEventListener("keydown", this.handleKeyDown);
   }
+
   componentWillUnmount() {
     window.removeEventListener("keydown", this.handleKeyDown);
   }
@@ -23,6 +19,7 @@ class Modal extends PureComponent {
       this.props.onClose();
     }
   };
+
   handleBackdropClick = (event) => {
     if (event.currentTarget === event.target) {
       this.props.onClose();
@@ -30,15 +27,15 @@ class Modal extends PureComponent {
   };
 
   render() {
-    const { children } = this.props;
     return createPortal(
-      <div className={style.backdrop} onClick={this.props.onClose}>
-        <div className={style.modal}>{children}</div>
+      <div className={styles.backdrop} onClick={this.handleBackdropClick}>
+        <div className={styles.modal}>{this.props.children}</div>
       </div>,
       modalRoot
     );
   }
 }
+
 Modal.defaultProps = {
   children: null,
 };
@@ -47,4 +44,5 @@ Modal.propTypes = {
   children: PropTypes.node,
   onClose: PropTypes.func.isRequired,
 };
+
 export default Modal;

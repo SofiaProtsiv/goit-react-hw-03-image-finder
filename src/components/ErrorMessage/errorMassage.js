@@ -1,7 +1,11 @@
-export default function ErrorMessage({ message }) {
+export default function ErrorMessage() {
   return (
     <div role="alert">
-      <p className="errorMessage">{message}</p>
+      <h2>Oops! 😫</h2>
+      <p>
+        Sorry, something went wrong. Please try again, or{" "}
+        <a href="/">refresh the page</a>.
+      </p>
     </div>
   );
 }

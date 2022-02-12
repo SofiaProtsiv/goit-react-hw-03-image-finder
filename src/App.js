@@ -2,24 +2,113 @@ import { Component } from "react";
 import { ToastContainer } from "react-toastify";
 import SearchBar from "./components/SearchBar";
 import ImageGallery from "./components/ImageGallery";
+import fetchImages from "./services/images-api";
+import ErrorMessage from "./components/ErrorMessage";
+import Loader from "./components/Loader";
+import Modal from "./components/Modal";
+import Button from "./components/Button";
+import IconButton from "./components/IconButton";
+import { ReactComponent as CloseBtn } from "./icons/close.svg";
 
 export default class App extends Component {
   state = {
-    searchQuery: "",
+    images: [],
     currentPage: 1,
+    searchQuery: "",
+    isLoading: false,
+    isModalOpen: false,
+    largeImage: "",
+    error: null,
+  };
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.searchQuery !== this.state.searchQuery) {
+      this.getImages();
+    }
+  }
+  getImages = async () => {
+    const { currentPage, searchQuery } = this.state;
+
+    this.setState({
+      isLoading: true,
+    });
+    try {
+      const { hits } = await fetchImages(searchQuery, currentPage);
+
+      this.setState((prevState) => ({
+        images: [...prevState.images, ...hits],
+        currentPage: prevState.currentPage + 1,
+      }));
+
+      if (currentPage !== 1) {
+        this.scroll();
+      }
+    } catch (error) {
+      console.log("Smth wrong with App fetch", error);
+      this.setState({ error });
+    } finally {
+      this.setState({
+        isLoading: false,
+      });
+    }
+  };
+
+  toggleModal = () => {
+    this.setState(({ isModalOpen }) => ({
+      isModalOpen: !isModalOpen,
+      largeImage: "",
+    }));
   };
 
   handleFormSubmit = (searchQuery) => {
-    this.setState({ searchQuery });
+    this.setState({
+      images: [],
+      currentPage: 1,
+      searchQuery,
+      error: null,
+    });
   };
 
+  handleGalleryItem = (fullImageUrl) => {
+    this.setState({ largeImage: fullImageUrl, isModalOpen: true });
+  };
+  scroll = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: "smooth",
+    });
+  };
   render() {
-    const { searchQuery, currentPage } = this.state;
+    const { images, isLoading, isModalOpen, largeImage, error } = this.state;
+    const showLoadMore = images.length > 0 && images.length >= 12;
+
     return (
-      <div style={{ width: "100%", margin: "0 auto", padding: 0 }}>
+      <>
         <SearchBar onSubmit={this.handleFormSubmit} />
-        <ImageGallery searchQuery={searchQuery} currentPage={currentPage} />
-      </div>
+
+        {images < 1 && (
+          <div className="preview">
+            <h2>The gallery is empty</h2>
+          </div>
+        )}
+
+        <ImageGallery images={images} openModal={this.handleGalleryItem} />
+
+        {showLoadMore && <Button onClick={this.getImages} />}
+
+        {isModalOpen && (
+          <Modal onClose={this.toggleModal}>
+            <IconButton onClick={this.toggleModal} aria-label="close modal">
+              <CloseBtn width="20px" height="20px" fill="#7e7b7b" />
+            </IconButton>
+            <img src={largeImage} alt="" className="modalImage" />
+          </Modal>
+        )}
+
+        {isLoading && <Loader />}
+
+        {error && <ErrorMessage />}
+      </>
     );
   }
 }
