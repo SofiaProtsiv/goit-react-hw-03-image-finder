@@ -1,5 +1,4 @@
 import { Component } from "react";
-import { ToastContainer } from "react-toastify";
 import SearchBar from "./components/SearchBar";
 import ImageGallery from "./components/ImageGallery";
 import fetchImages from "./services/images-api";
@@ -21,7 +20,7 @@ export default class App extends Component {
     error: null,
   };
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevState, prevProps) {
     if (prevState.searchQuery !== this.state.searchQuery) {
       this.getImages();
     }
@@ -44,7 +43,6 @@ export default class App extends Component {
         this.scroll();
       }
     } catch (error) {
-      console.log("Smth wrong with App fetch", error);
       this.setState({ error });
     } finally {
       this.setState({
@@ -72,25 +70,22 @@ export default class App extends Component {
   handleGalleryItem = (fullImageUrl) => {
     this.setState({ largeImage: fullImageUrl, isModalOpen: true });
   };
+
   scroll = () => {
     window.scrollTo({
       top: document.documentElement.scrollHeight,
       behavior: "smooth",
     });
   };
+
   render() {
     const { images, isLoading, isModalOpen, largeImage, error } = this.state;
     const showLoadMore = images.length > 0 && images.length >= 12;
-
     return (
       <>
         <SearchBar onSubmit={this.handleFormSubmit} />
 
-        {images < 1 && (
-          <div className="preview">
-            <h2>The gallery is empty</h2>
-          </div>
-        )}
+        {isLoading && <Loader />}
 
         <ImageGallery images={images} openModal={this.handleGalleryItem} />
 
@@ -99,13 +94,11 @@ export default class App extends Component {
         {isModalOpen && (
           <Modal onClose={this.toggleModal}>
             <IconButton onClick={this.toggleModal} aria-label="close modal">
-              <CloseBtn width="20px" height="20px" fill="#7e7b7b" />
+              <CloseBtn width="20px" height="20px" fill="black" />
             </IconButton>
             <img src={largeImage} alt="" className="modalImage" />
           </Modal>
         )}
-
-        {isLoading && <Loader />}
 
         {error && <ErrorMessage />}
       </>

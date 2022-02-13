@@ -1,6 +1,5 @@
 import { Component } from "react";
 import { ImSearch } from "react-icons/im";
-import { toast } from "react-toastify";
 import style from "./searchbar.module.css";
 
 export default class SearchBar extends Component {
@@ -15,12 +14,8 @@ export default class SearchBar extends Component {
   handleSubmit = (event) => {
     event.preventDefault();
 
-    if (this.state.searchQuery.trim() === "") {
-      toast.error("Search result not successful. Try again.");
-      return;
-    }
-
     this.props.onSubmit(this.state.searchQuery);
+
     this.setState({ searchQuery: "" });
   };
 
