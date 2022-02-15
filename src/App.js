@@ -31,17 +31,15 @@ export default class App extends Component {
   }
 
   getImages = (query, page) => {
-    if (query === "") {
-      this.setState({
-        isLoading: false,
-        error: true,
-      });
-      return;
-    } else {
-      this.setState({
-        isLoading: true,
-      });
-    }
+    query === ""
+      ? this.setState({
+          isLoading: false,
+          error: true,
+        })
+      : this.setState({
+          isLoading: true,
+        });
+
     fetchImagesApi
       .get(query, page)
       .then(({ data }) => {
@@ -54,12 +52,15 @@ export default class App extends Component {
       })
       .finally(() => {
         const { images } = this.state;
+
         images.length < 1
           ? this.setState({ error: true })
           : this.setState({ error: false });
+
         this.setState({
           isLoading: false,
         });
+
         page > 1 && this.scroll();
       });
   };
@@ -72,12 +73,18 @@ export default class App extends Component {
   };
 
   handleFormSubmit = (searchQuery) => {
-    this.setState({
-      images: [],
-      currentPage: 1,
-      searchQuery,
-      error: false,
-    });
+    searchQuery === ""
+      ? this.setState({
+          images: [],
+          currentPage: 1,
+          error: true,
+        })
+      : this.setState({
+          images: [],
+          currentPage: 1,
+          searchQuery,
+          error: false,
+        });
   };
 
   handleGalleryItem = (fullImageUrl) => {
@@ -104,6 +111,7 @@ export default class App extends Component {
     return (
       <>
         <SearchBar onSubmit={this.handleFormSubmit} />
+
         {error === null && (
           <p className="preview">Start searching for images 👀</p>
         )}
