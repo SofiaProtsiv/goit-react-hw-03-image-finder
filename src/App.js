@@ -1,7 +1,7 @@
 import { Component } from "react";
 import SearchBar from "./components/SearchBar";
 import ImageGallery from "./components/ImageGallery";
-import fetchImages from "./services/images-api";
+import * as fetchImagesApi from "./services/images-api";
 import ErrorMessage from "./components/ErrorMessage";
 import Loader from "./components/Loader";
 import Modal from "./components/Modal";
@@ -20,35 +20,48 @@ export default class App extends Component {
     error: null,
   };
 
-  componentDidUpdate(prevState, prevProps) {
-    if (prevState.searchQuery !== this.state.searchQuery) {
-      this.getImages();
+  componentDidUpdate(prevProps, prevState) {
+    const { currentPage, searchQuery } = this.state;
+    if (
+      prevState.searchQuery !== searchQuery ||
+      prevState.currentPage !== currentPage
+    ) {
+      this.getImages(searchQuery, currentPage);
     }
   }
-  getImages = async () => {
-    const { currentPage, searchQuery } = this.state;
 
-    this.setState({
-      isLoading: true,
-    });
-    try {
-      const { hits } = await fetchImages(searchQuery, currentPage);
-
-      this.setState((prevState) => ({
-        images: [...prevState.images, ...hits],
-        currentPage: prevState.currentPage + 1,
-      }));
-
-      if (currentPage !== 1) {
-        this.scroll();
-      }
-    } catch (error) {
-      this.setState({ error });
-    } finally {
+  getImages = (query, page) => {
+    if (query === "") {
       this.setState({
         isLoading: false,
+        error: true,
+      });
+      return;
+    } else {
+      this.setState({
+        isLoading: true,
       });
     }
+    fetchImagesApi
+      .get(query, page)
+      .then(({ data }) => {
+        this.setState((prevState) => ({
+          images: [...prevState.images, ...data.hits],
+        }));
+      })
+      .catch((error) => {
+        throw new Error(error);
+      })
+      .finally(() => {
+        const { images } = this.state;
+        images.length < 1
+          ? this.setState({ error: true })
+          : this.setState({ error: false });
+        this.setState({
+          isLoading: false,
+        });
+        page > 1 && this.scroll();
+      });
   };
 
   toggleModal = () => {
@@ -63,12 +76,19 @@ export default class App extends Component {
       images: [],
       currentPage: 1,
       searchQuery,
-      error: null,
+      error: false,
     });
   };
 
   handleGalleryItem = (fullImageUrl) => {
     this.setState({ largeImage: fullImageUrl, isModalOpen: true });
+  };
+
+  handleClickOnMore = () => {
+    const { currentPage } = this.state;
+    this.setState({
+      currentPage: currentPage + 1,
+    });
   };
 
   scroll = () => {
@@ -84,12 +104,15 @@ export default class App extends Component {
     return (
       <>
         <SearchBar onSubmit={this.handleFormSubmit} />
+        {error === null && (
+          <p className="preview">Start searching for images 👀</p>
+        )}
 
         {isLoading && <Loader />}
 
         <ImageGallery images={images} openModal={this.handleGalleryItem} />
 
-        {showLoadMore && <Button onClick={this.getImages} />}
+        {showLoadMore && <Button onClick={this.handleClickOnMore} />}
 
         {isModalOpen && (
           <Modal onClose={this.toggleModal}>

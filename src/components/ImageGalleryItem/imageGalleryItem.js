@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 export default function ImageGalleryItem({ image, openModal }) {
   const fullImage = () => openModal(image.largeImageURL);
   return (
-    <li key={image.id} id={image.id} className={style.item}>
+    <li id={image.id} className={style.item}>
       <img
         className={style.image}
         src={image.webformatURL}
